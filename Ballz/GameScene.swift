@@ -58,9 +58,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         gameBalls.append(droppedBall)
         ballsInFunnel.removeAtIndex(0)
         addRandomBalls(1)
-        
-        
-        
     }
    
     override func update(currentTime: CFTimeInterval) {
@@ -73,7 +70,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func didBeginContact(contact: SKPhysicsContact) {
-        print("Contact")
         let ballA = contact.bodyA.node as? Ball
         let ballB = contact.bodyB.node as? Ball
         var fallingBall: Ball!
@@ -92,25 +88,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         if(fallingBall.isConnected == false) {
             addElementsToDictionary(fallingBall)
-            
         }
         
         fallingBall.isConnected = true
         /* Must remove collision properties or ball may continue to make an obscene number of joints */
         fallingBall.removeCollisions()
-        
-        for i in ballNeighbours.keys {
-            for j in ballNeighbours[i]! {
-                print(j.ballColor)
-            }
-        }
-        print("------------------")
-
-
     }
-    
-    
-    
     
     func addElementsToDictionary(fallingBall: Ball) {
         /* Adding the falling balls to the array */
@@ -129,25 +112,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         /* Loop through ballNeighbours to see if we have matches */
         for key in ballNeighbours.keys {
             if(ballNeighbours[key]?.count == 3) {
-                
-
-               
-                
                 let ballsToBeRemoved = ballNeighbours[key]!
                 objectsToRemove += ballsToBeRemoved
-//                print(ballNeighbours.removeValueForKey(key))
-//                
-//                print("-----")
+                ballNeighbours.removeValueForKey(key)
             }
         }
     }
     
     override func didSimulatePhysics() {
-        
         findElementsToRemove()
-        
 
-        
         for obj in objectsToRemove {
             obj.removeFromParent()
         }
@@ -179,9 +153,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
 //        innerCircle.physicsBody?.affectedByGravity = false
 //        innerCircle.physicsBody?.dynamic = false
         
-        /* Physics contact is two ways - i.e. ball hits windmill and windmill hits ball
-           We only need to consider whether the ball hit the windmill and not the other way around 
-           Therefore, the windmill's collision and contact mask are both 0 (None) */
+        /* Physics contact is two ways - i.e. ball hits circle and circle hits ball
+           We only need to consider whether the ball hit the circle and not the other way around
+           Therefore, the circle's collision and contact mask are both 0 (None) */
         innerCircle.physicsBody?.categoryBitMask = PhysicsCategory.InnerCircle
         innerCircle.physicsBody?.collisionBitMask = PhysicsCategory.None
         innerCircle.physicsBody?.contactTestBitMask = PhysicsCategory.None
