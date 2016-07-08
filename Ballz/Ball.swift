@@ -22,6 +22,8 @@ enum Color: String
 class Ball: SKSpriteNode {
     
     var isConnected = false
+    var hasNeighbourList = false
+    var neighbours: [Ball] = []
     var ballColor: Color = .Green   //First ball is green
     
     func removeCollisions() {

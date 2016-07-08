@@ -8,11 +8,17 @@
 
 import SpriteKit
 
+enum GameState {
+    case Playing, GameOver
+}
+
 class GameScene: SKScene, SKPhysicsContactDelegate {
     var timer: NSTimer?
     var timerRunning = false
     var funnel: SKShapeNode! = nil
     var innerCircle: SKSpriteNode!
+    //TODO: IMPLEMENT BOUNDARY
+    var boundary: SKSpriteNode!
     /* Used to create other Ball objects by the .copy() method */
     var genericBall: Ball!
     /* Stores all balls in the funnel */
@@ -23,27 +29,60 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var ballNeighbours = [String: [Ball]]()
     var objectsToRemove = [Ball]()
     
+    var gameState: GameState = .Playing
+    
+    var scoreLabel: SKLabelNode!
+    
     /* How fast the mill rotates */
-    let MILL_ROTATION = CGFloat(0.02)
+    var rotationSpeed = CGFloat(0.02)
+    var completedMerges = 0 {
+        didSet {
+            scoreLabel.text = String(completedMerges*100)
+        }
+    }
+    
     /* The position of the bottom most ball on the funnel */
     let LAST_BALL_POSITION = CGPoint(x: 187.5, y: 550.5)
     /* The distance the next ball will spawn above the one below it*/
     let BALL_INCREMENT = CGPoint(x: 0, y: 35)
-    let TIMER_LENGTH = 0.5
+    let TIMER_LENGTH = 0.15
+    let LARGEST_DIST_BETWEEN_BALLS = CGFloat(45)
+    
+    /* health bar */
+    var lifebar: SKSpriteNode!
+    
+    var life: CGFloat = 1.0 {
+        didSet {
+            /* Scale health bar between 0.0 -> 1.0 e.g 0 -> 100% */
+            lifebar.xScale = life
+        }
+    }
 
     override func didMoveToView(view: SKView) {
+        
+        
+        /* connect lifebar */
+        lifebar = childNodeWithName("lifebar") as! SKSpriteNode
+        
         /* Set physics world delegate */
         physicsWorld.contactDelegate = self
 
         addFunnel()
         initializeVars()
         ballsInFunnel.append(genericBall)
-        self.physicsWorld.gravity = CGVector(dx: 0, dy: -7.5)
+        self.physicsWorld.gravity = CGVector(dx: 0, dy: -9.8)
         addRandomBalls(4)
     }
     
     override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
+        if(gameState == .GameOver || timerRunning) { return }
+        
+        
         if(timerRunning) { return }
+        
+        /* play ball dropping SFX */
+        let droppingSound = SKAction.playSoundFileNamed("dropping bubbles", waitForCompletion: false)
+        self.runAction(droppingSound)
         
         timerRunning = true
         timer = NSTimer.scheduledTimerWithTimeInterval(TIMER_LENGTH, target: self, selector: (#selector(GameScene.stopTimer)), userInfo: nil, repeats: false)
@@ -61,7 +100,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
    
     override func update(currentTime: CFTimeInterval) {
-        innerCircle.zRotation += MILL_ROTATION
+        if(gameState == .GameOver) { return }
+        
+        rotationSpeed += 0.000007
+        
+        innerCircle.zRotation += rotationSpeed
+        
+        life -= 0.0005
+        
+        if(life <= 0) { gameOver() }
     }
     
     func stopTimer() {
@@ -85,7 +132,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         let joint = SKPhysicsJointFixed.jointWithBodyA(fallingBall!.physicsBody!, bodyB: innerCircle.physicsBody!, anchor: ANCHOR_POINT)
         self.physicsWorld.addJoint(joint)
+    
         
+        findBallNeighbours()
+        checkForThreeInARow()
+        
+
         if(fallingBall.isConnected == false) {
             addElementsToDictionary(fallingBall)
         }
@@ -93,6 +145,25 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         fallingBall.isConnected = true
         /* Must remove collision properties or ball may continue to make an obscene number of joints */
         fallingBall.removeCollisions()
+    }
+    
+    func checkForThreeInARow() {
+        for ball in gameBalls {
+            var toRemoveSublist: [Ball] = []
+            
+            for neighbour in ball.neighbours {
+                if(neighbour.ballColor == ball.ballColor) {
+                    toRemoveSublist.append(neighbour)
+                }
+            }
+            if(toRemoveSublist.count >= 2) {
+                objectsToRemove += toRemoveSublist
+                objectsToRemove.append(ball)
+                life += 0.1
+                completedMerges += 1
+            }
+            ball.neighbours = []
+        }
     }
     
     func addElementsToDictionary(fallingBall: Ball) {
@@ -107,23 +178,31 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
     }
     
-    func findElementsToRemove() {
-        
-        /* Loop through ballNeighbours to see if we have matches */
-        for key in ballNeighbours.keys {
-            if(ballNeighbours[key]?.count == 3) {
-                let ballsToBeRemoved = ballNeighbours[key]!
-                objectsToRemove += ballsToBeRemoved
-                ballNeighbours.removeValueForKey(key)
+    func findBallNeighbours() {
+        for ball in gameBalls {
+            /* Balls constantly add themselves to own neighbour lists */
+            for potentialNeighbour in gameBalls {
+                let distance = ball.position.distanceFromCGPoint(potentialNeighbour.position)
+                if(distance < LARGEST_DIST_BETWEEN_BALLS && distance != 0) {
+                    ball.neighbours.append(potentialNeighbour)
+                }
             }
+            
         }
     }
     
     override func didSimulatePhysics() {
-        findElementsToRemove()
 
         for obj in objectsToRemove {
             obj.removeFromParent()
+            if let index = gameBalls.indexOf(obj) {
+                gameBalls.removeAtIndex(index)
+                
+                /* play combo SFX */
+                let bubbleCombo = SKAction.playSoundFileNamed("bubblecombo", waitForCompletion: false)
+                self.runAction(bubbleCombo)
+            }
+            
         }
         objectsToRemove.removeAll()
     }
@@ -144,14 +223,23 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
     }
     
+    func gameOver() {
+        gameState = .GameOver
+        self.removeAllActions()
+        innerCircle.physicsBody?.affectedByGravity = true
+        
+        /* play gameover SFX */
+        let gameOverSound = SKAction.playSoundFileNamed("gameover (1)", waitForCompletion: false)
+        self.runAction(gameOverSound)
+                
+    }
+    
+    
     func initializeVars() {
         innerCircle = self.childNodeWithName("innerCircle") as! SKSpriteNode
         genericBall = self.childNodeWithName("genericBall") as! Ball
-        
-//        let innerCirclePhysicsBody = SKPhysicsBody(circleOfRadius: CGFloat(65))
-//        innerCircle.physicsBody = innerCirclePhysicsBody
-//        innerCircle.physicsBody?.affectedByGravity = false
-//        innerCircle.physicsBody?.dynamic = false
+        boundary = self.childNodeWithName("boundary") as! SKSpriteNode
+        scoreLabel = self.childNodeWithName("scoreLabel") as! SKLabelNode
         
         /* Physics contact is two ways - i.e. ball hits circle and circle hits ball
            We only need to consider whether the ball hit the circle and not the other way around
@@ -167,7 +255,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         funnel.physicsBody?.categoryBitMask = PhysicsCategory.Funnel
         funnel.physicsBody?.collisionBitMask = PhysicsCategory.Ball
         funnel.physicsBody?.contactTestBitMask = PhysicsCategory.None
+        
     }
+
     
     func addFunnel() {
         let path = UIBezierPath()
@@ -185,5 +275,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         funnel.strokeColor = UIColor.darkGrayColor()
         funnel.lineWidth = 4
         self.addChild(funnel)
+    }
+}
+
+
+
+extension CGPoint {
+    func distanceFromCGPoint(point:CGPoint)->CGFloat{
+        return sqrt(pow(self.x - point.x,2) + pow(self.y - point.y,2))
     }
 }
