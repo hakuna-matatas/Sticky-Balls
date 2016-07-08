@@ -9,15 +9,19 @@
 import SpriteKit
 
 class GameScene: SKScene, SKPhysicsContactDelegate {
-    var funnel: SKShapeNode! = nil
-    var windmill: SKSpriteNode!
-    /* Used to create other Ball objects by the .copy() method */
-    var genericBall: Ball!
-    /* Stores all balls in the gamescene */
-    var ballArray: [Ball] = []
-    
     var timer: NSTimer?
     var timerRunning = false
+    var funnel: SKShapeNode! = nil
+    var innerCircle: SKSpriteNode!
+    /* Used to create other Ball objects by the .copy() method */
+    var genericBall: Ball!
+    /* Stores all balls in the funnel */
+    var ballsInFunnel: [Ball] = []
+    /* Stores balls that left the funnel */
+    var gameBalls: [Ball] = []
+    
+    var ballNeighbours = [String: [Ball]]()
+    var objectsToRemove = [Ball]()
     
     /* How fast the mill rotates */
     let MILL_ROTATION = CGFloat(0.02)
@@ -33,7 +37,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
 
         addFunnel()
         initializeVars()
-        ballArray.append(genericBall)
+        ballsInFunnel.append(genericBall)
         self.physicsWorld.gravity = CGVector(dx: 0, dy: -7.5)
         addRandomBalls(4)
     }
@@ -41,22 +45,26 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
         if(timerRunning) { return }
         
-        let droppedBall = ballArray[0]
-        
-        /* To drop the ball from funnel, we change the ball's collision bit mask */
-        droppedBall.physicsBody?.collisionBitMask = PhysicsCategory.Windmill | PhysicsCategory.Ball
-        /* Now that the ball has dropped, we care about what the ball contacts */
-        droppedBall.physicsBody?.contactTestBitMask = PhysicsCategory.Windmill | PhysicsCategory.Ball
-        
-        ballArray.removeAtIndex(0)
-        addRandomBalls(1)
-        
         timerRunning = true
         timer = NSTimer.scheduledTimerWithTimeInterval(TIMER_LENGTH, target: self, selector: (#selector(GameScene.stopTimer)), userInfo: nil, repeats: false)
+        
+        let droppedBall = ballsInFunnel[0]
+        
+        /* To drop the ball from funnel, we change the ball's collision bit mask */
+        droppedBall.physicsBody?.collisionBitMask = PhysicsCategory.InnerCircle | PhysicsCategory.Ball
+        /* Now that the ball has dropped, we care about what the ball contacts */
+        droppedBall.physicsBody?.contactTestBitMask = PhysicsCategory.InnerCircle | PhysicsCategory.Ball
+        
+        gameBalls.append(droppedBall)
+        ballsInFunnel.removeAtIndex(0)
+        addRandomBalls(1)
+        
+        
+        
     }
    
     override func update(currentTime: CFTimeInterval) {
-        windmill.zRotation += MILL_ROTATION
+        innerCircle.zRotation += MILL_ROTATION
     }
     
     func stopTimer() {
@@ -65,6 +73,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func didBeginContact(contact: SKPhysicsContact) {
+        print("Contact")
         let ballA = contact.bodyA.node as? Ball
         let ballB = contact.bodyB.node as? Ball
         var fallingBall: Ball!
@@ -77,38 +86,105 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         }
         
         let ANCHOR_POINT = contact.contactPoint
-        let joint = SKPhysicsJointFixed.jointWithBodyA(fallingBall!.physicsBody!, bodyB: windmill.physicsBody!, anchor: ANCHOR_POINT)
+        
+        let joint = SKPhysicsJointFixed.jointWithBodyA(fallingBall!.physicsBody!, bodyB: innerCircle.physicsBody!, anchor: ANCHOR_POINT)
         self.physicsWorld.addJoint(joint)
+        
+        if(fallingBall.isConnected == false) {
+            addElementsToDictionary(fallingBall)
+            
+        }
+        
         fallingBall.isConnected = true
         /* Must remove collision properties or ball may continue to make an obscene number of joints */
         fallingBall.removeCollisions()
+        
+        for i in ballNeighbours.keys {
+            for j in ballNeighbours[i]! {
+                print(j.ballColor)
+            }
+        }
+        print("------------------")
+
+
     }
+    
+    
+    
+    
+    func addElementsToDictionary(fallingBall: Ball) {
+        /* Adding the falling balls to the array */
+        let ballColor = fallingBall.ballColor.rawValue
+        
+        if let _ = ballNeighbours[ballColor] {
+            ballNeighbours[ballColor]?.append(fallingBall)
+        }
+        else {
+            ballNeighbours[ballColor] = [fallingBall]
+        }
+    }
+    
+    func findElementsToRemove() {
+        
+        /* Loop through ballNeighbours to see if we have matches */
+        for key in ballNeighbours.keys {
+            if(ballNeighbours[key]?.count == 3) {
+                
+
+               
+                
+                let ballsToBeRemoved = ballNeighbours[key]!
+                objectsToRemove += ballsToBeRemoved
+//                print(ballNeighbours.removeValueForKey(key))
+//                
+//                print("-----")
+            }
+        }
+    }
+    
+    override func didSimulatePhysics() {
+        
+        findElementsToRemove()
+        
+
+        
+        for obj in objectsToRemove {
+            obj.removeFromParent()
+        }
+        objectsToRemove.removeAll()
+    }
+    
     
     func addRandomBalls(nTimes: Int) {
         for _ in 0 ..< nTimes {
-            let newBall = ballArray.last!.copy() as! Ball
+            let newBall = ballsInFunnel.last!.copy() as! Ball
             
             newBall.position.y += BALL_INCREMENT.y
             newBall.texture = SKTexture(imageNamed: newBall.randomizeColor().rawValue)
             
-            let physicsBody = SKPhysicsBody(circleOfRadius: CGFloat(19))
+            let physicsBody = SKPhysicsBody(circleOfRadius: CGFloat(14))
             newBall.physicsBody = physicsBody
             
             self.addChild(newBall)
-            ballArray.append(newBall)
+            ballsInFunnel.append(newBall)
         }
     }
     
     func initializeVars() {
-        windmill = self.childNodeWithName("windmill") as! SKSpriteNode
+        innerCircle = self.childNodeWithName("innerCircle") as! SKSpriteNode
         genericBall = self.childNodeWithName("genericBall") as! Ball
+        
+//        let innerCirclePhysicsBody = SKPhysicsBody(circleOfRadius: CGFloat(65))
+//        innerCircle.physicsBody = innerCirclePhysicsBody
+//        innerCircle.physicsBody?.affectedByGravity = false
+//        innerCircle.physicsBody?.dynamic = false
         
         /* Physics contact is two ways - i.e. ball hits windmill and windmill hits ball
            We only need to consider whether the ball hit the windmill and not the other way around 
            Therefore, the windmill's collision and contact mask are both 0 (None) */
-        windmill.physicsBody?.categoryBitMask = PhysicsCategory.Windmill
-        windmill.physicsBody?.collisionBitMask = PhysicsCategory.None
-        windmill.physicsBody?.contactTestBitMask = PhysicsCategory.None
+        innerCircle.physicsBody?.categoryBitMask = PhysicsCategory.InnerCircle
+        innerCircle.physicsBody?.collisionBitMask = PhysicsCategory.None
+        innerCircle.physicsBody?.contactTestBitMask = PhysicsCategory.None
         
         genericBall.physicsBody?.categoryBitMask = PhysicsCategory.Ball
         genericBall.physicsBody?.collisionBitMask = PhysicsCategory.Ball | PhysicsCategory.Funnel

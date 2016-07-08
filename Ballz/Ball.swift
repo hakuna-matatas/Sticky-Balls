@@ -22,6 +22,7 @@ enum Color: String
 class Ball: SKSpriteNode {
     
     var isConnected = false
+    var ballColor: Color = .Green   //First ball is green
     
     func removeCollisions() {
         self.physicsBody?.collisionBitMask = PhysicsCategory.None
@@ -44,6 +45,7 @@ class Ball: SKSpriteNode {
         else {
             newBallColor = .Yellow
         }
+        ballColor = newBallColor
         return newBallColor
     }
     

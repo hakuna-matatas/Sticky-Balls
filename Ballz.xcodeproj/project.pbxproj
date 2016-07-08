@@ -13,7 +13,9 @@
 		E71580391D2D860D00F4ECBE /* Red Ball.png in Resources */ = {isa = PBXBuildFile; fileRef = E71580351D2D860D00F4ECBE /* Red Ball.png */; };
 		E715803B1D2D863A00F4ECBE /* Yellow Ball.png in Resources */ = {isa = PBXBuildFile; fileRef = E715803A1D2D863A00F4ECBE /* Yellow Ball.png */; };
 		E715803D1D2DA5AE00F4ECBE /* PhysicsCategory.swift in Sources */ = {isa = PBXBuildFile; fileRef = E715803C1D2DA5AE00F4ECBE /* PhysicsCategory.swift */; };
-		E715803F1D2DAE2800F4ECBE /* Windmill Thing.png in Resources */ = {isa = PBXBuildFile; fileRef = E715803E1D2DAE2800F4ECBE /* Windmill Thing.png */; };
+		E73D6AEF1D2F12D800A51B3A /* gamebg1.png in Resources */ = {isa = PBXBuildFile; fileRef = E73D6AEE1D2F12D800A51B3A /* gamebg1.png */; };
+		E73D6AF21D2F133300A51B3A /* Inner_Circle.png in Resources */ = {isa = PBXBuildFile; fileRef = E73D6AF01D2F133300A51B3A /* Inner_Circle.png */; };
+		E73D6AF31D2F133300A51B3A /* Outer_Circle.png in Resources */ = {isa = PBXBuildFile; fileRef = E73D6AF11D2F133300A51B3A /* Outer_Circle.png */; };
 		E75569121D2C798E0015D157 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = E75569111D2C798E0015D157 /* AppDelegate.swift */; };
 		E75569141D2C798E0015D157 /* GameScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = E75569131D2C798E0015D157 /* GameScene.sks */; };
 		E75569161D2C798E0015D157 /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = E75569151D2C798E0015D157 /* GameScene.swift */; };
@@ -52,7 +54,9 @@
 		E71580351D2D860D00F4ECBE /* Red Ball.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Red Ball.png"; sourceTree = "<group>"; };
 		E715803A1D2D863A00F4ECBE /* Yellow Ball.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Yellow Ball.png"; sourceTree = "<group>"; };
 		E715803C1D2DA5AE00F4ECBE /* PhysicsCategory.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhysicsCategory.swift; sourceTree = "<group>"; };
-		E715803E1D2DAE2800F4ECBE /* Windmill Thing.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Windmill Thing.png"; sourceTree = "<group>"; };
+		E73D6AEE1D2F12D800A51B3A /* gamebg1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = gamebg1.png; sourceTree = "<group>"; };
+		E73D6AF01D2F133300A51B3A /* Inner_Circle.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Inner_Circle.png; sourceTree = "<group>"; };
+		E73D6AF11D2F133300A51B3A /* Outer_Circle.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Outer_Circle.png; sourceTree = "<group>"; };
 		E755690E1D2C798E0015D157 /* Ballz.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Ballz.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E75569111D2C798E0015D157 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		E75569131D2C798E0015D157 /* GameScene.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = GameScene.sks; sourceTree = "<group>"; };
@@ -131,10 +135,12 @@
 				E755691C1D2C798E0015D157 /* Assets.xcassets */,
 				E755691E1D2C798E0015D157 /* LaunchScreen.storyboard */,
 				E75569211D2C798E0015D157 /* Info.plist */,
+				E73D6AEE1D2F12D800A51B3A /* gamebg1.png */,
+				E73D6AF01D2F133300A51B3A /* Inner_Circle.png */,
+				E73D6AF11D2F133300A51B3A /* Outer_Circle.png */,
 				E75569431D2C7BC30015D157 /* Black Ball.png */,
 				E75569461D2C7BC30015D157 /* Rainbow Ball.png */,
 				E71580301D2D7EE600F4ECBE /* Combined Shape.png */,
-				E715803E1D2DAE2800F4ECBE /* Windmill Thing.png */,
 				E71580321D2D860D00F4ECBE /* Blue Ball.png */,
 				E715803A1D2D863A00F4ECBE /* Yellow Ball.png */,
 				E71580331D2D860D00F4ECBE /* Green Ball.png */,
@@ -268,15 +274,17 @@
 			files = (
 				E755694D1D2C7BC30015D157 /* Rainbow Ball.png in Resources */,
 				E75569141D2C798E0015D157 /* GameScene.sks in Resources */,
+				E73D6AEF1D2F12D800A51B3A /* gamebg1.png in Resources */,
 				E75569201D2C798E0015D157 /* LaunchScreen.storyboard in Resources */,
+				E73D6AF21D2F133300A51B3A /* Inner_Circle.png in Resources */,
 				E71580371D2D860D00F4ECBE /* Green Ball.png in Resources */,
 				E755691D1D2C798E0015D157 /* Assets.xcassets in Resources */,
 				E715803B1D2D863A00F4ECBE /* Yellow Ball.png in Resources */,
 				E71580311D2D7EE600F4ECBE /* Combined Shape.png in Resources */,
-				E715803F1D2DAE2800F4ECBE /* Windmill Thing.png in Resources */,
 				E755694A1D2C7BC30015D157 /* Black Ball.png in Resources */,
 				E755691B1D2C798E0015D157 /* Main.storyboard in Resources */,
 				E71580391D2D860D00F4ECBE /* Red Ball.png in Resources */,
+				E73D6AF31D2F133300A51B3A /* Outer_Circle.png in Resources */,
 				E71580361D2D860D00F4ECBE /* Blue Ball.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -453,6 +461,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = Ballz/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.AlanGao.Ballz;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -467,6 +476,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = Ballz/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.AlanGao.Ballz;
 				PRODUCT_NAME = "$(TARGET_NAME)";

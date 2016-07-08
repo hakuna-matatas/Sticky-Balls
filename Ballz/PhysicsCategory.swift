@@ -12,5 +12,5 @@ struct PhysicsCategory {
     static let None:        UInt32 = 0b0    //000
     static let Ball:        UInt32 = 0b1    //001
     static let Funnel:      UInt32 = 0b10   //010
-    static let Windmill:    UInt32 = 0b100  //100
+    static let InnerCircle: UInt32 = 0b100  //100
 }
