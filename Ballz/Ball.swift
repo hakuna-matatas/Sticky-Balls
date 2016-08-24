@@ -15,8 +15,6 @@ enum Color: String
     case Red = "Red Ball"
     case Yellow = "Yellow Ball"
     case Green = "Green Ball"
-    case Black = "Black Ball"
-    case Rainbow = "Rainbow Ball"
 }
 
 class Ball: SKSpriteNode {
@@ -25,6 +23,40 @@ class Ball: SKSpriteNode {
     var hasNeighbourList = false
     var neighbours: [Ball] = []
     var ballColor: Color = .Green   //First ball is green
+    
+    static let LARGEST_DIST_BETWEEN_BALLS = CGFloat(45)
+    
+    static func findBallNeighbours(gameBalls: [Ball]) {
+        for ball in gameBalls {
+            for potentialNeighbour in gameBalls {
+                let distance = ball.position.distanceFromCGPoint(potentialNeighbour.position)
+                if(distance < self.LARGEST_DIST_BETWEEN_BALLS && distance != 0) {
+                    ball.neighbours.append(potentialNeighbour)
+                }
+            }
+        }
+    }
+    
+    static func checkForThreeInARow(gameBalls: [Ball]) -> [Ball] {
+        var objectsToRemove: [Ball] = []
+        
+        for ball in gameBalls {
+            var toRemoveSublist: [Ball] = []
+            
+            for neighbour in ball.neighbours {
+                if(neighbour.ballColor == ball.ballColor) {
+                    toRemoveSublist.append(neighbour)
+                }
+            }
+            if(toRemoveSublist.count >= 2) {
+                objectsToRemove += toRemoveSublist
+                objectsToRemove.append(ball)
+            }
+            ball.neighbours = []
+        }
+        
+        return objectsToRemove
+    }
     
     func removeCollisions() {
         self.physicsBody?.collisionBitMask = PhysicsCategory.None
@@ -58,5 +90,12 @@ class Ball: SKSpriteNode {
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
-    
+}
+
+
+
+extension CGPoint {
+    func distanceFromCGPoint(point:CGPoint)->CGFloat{
+        return sqrt(pow(self.x - point.x,2) + pow(self.y - point.y,2))
+    }
 }
